@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+    <h2 id="album-title"></h2>
+    <input type="file" id="photo-upload" accept="image/*">
+    <button id="add-photo-button">Add Photo</button>
+    <button id="save-photos-button">Save Photos</button>
+    <div id="photo-container"></div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const albumName = params.get('album'); // Get the album name from the URL
+        document.getElementById('album-title').textContent = albumName; // Set album title
+
+        // Load previously saved photos from local storage
+        const loadPhotos = () => {
+            const savedPhotos = JSON.parse(localStorage.getItem(albumName)) || []; // Get saved photos for the album
+            savedPhotos.forEach(photo => {
+                const img = document.createElement('img'); // Create an image element
+                img.src = photo; // Set the image source
+                img.style.width = '100%'; // Adjust size
+                img.style.border = '1px solid #ccc'; // Border style
+                document.getElementById('photo-container').appendChild(img); // Add image to the container
+            });
+        };
+
+        // Add photo functionality
+        document.getElementById('add-photo-button').onclick = function() {
+            const photoInput = document.getElementById('photo-upload');
+            const file = photoInput.files[0]; // Get the selected file
+            if (file) {
+                const reader = new FileReader(); // Create a FileReader to read the file
+                reader.onload = function(e) {
+                    const img = document.createElement('img'); // Create an image element
+                    img.src = e.target.result; // Set the image source
+                    img.style.width = '100%'; // Adjust size
+                    img.style.border = '1px solid #ccc'; // Border style
+                    document.getElementById('photo-container').appendChild(img); // Add image to the container
+                    photoInput.value = ''; // Clear the input after adding
+                };
+                reader.readAsDataURL(file); // Read the file as data URL
+            } else {
+                alert('Please choose a photo to upload.'); // Alert if no photo selected
+            }
+        };
+
+        // Save photos to local storage
+        document.getElementById('save-photos-button').onclick = function() {
+            const photos = [];
+            const photoElements = document.querySelectorAll('#photo-container img'); // Select all images in the container
+            photoElements.forEach(img => {
+                photos.push(img.src); // Add image source to array
+            });
+            localStorage.setItem(albumName, JSON.stringify(photos)); // Save photos to local storage
+            alert('Photos saved for ' + albumName + '!'); // Alert user
+        };
+
+        // Load photos when the page loads
+        loadPhotos();
+    </script>
+</body>
+</html>

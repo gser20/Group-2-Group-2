@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friendster Profile</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
+
+    <style>
+        /* General body styling */
+        body {
+            font-family: 'Courier Prime', monospace;
+            background-color: #f0f0f0;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            font-size: 14px;
+        }
+
+        /* Top bar */
+        #top-bar {
+            background-color: #00008B;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            border-bottom: 2px solid #fff;
+        }
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .search-bar input {
+            padding: 5px;
+            border-radius: 2px;
+            border: 1px solid #000;
+            outline: none;
+        }
+        .top-links a {
+            text-decoration: none;
+            color: #fff;
+            margin: 0 10px;
+        }
+
+        /* Container */
+        #container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #000;
+            background-color: #fff;
+        }
+        #left-column {
+            width: 70%;
+            padding: 10px;
+            border-right: 1px solid #000;
+        }
+        #right-column {
+            width: 30%;
+            padding: 10px;
+        }
+
+        /* Profile section */
+        .profile-section {
+            padding: 10px;
+            text-align: center;
+        }
+        .profile-banner {
+            width: 100%;
+            height: 100px;
+            background-color: #ccc;
+            border: 1px solid #000;
+            margin-bottom: 10px;
+            background-size: cover;
+            background-position: center;
+        }
+        .profile-section img {
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
+        }
+        .profile-section h2 {
+            font-weight: bold;
+            color: #00008B;
+        }
+        .profile-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        /* Customization panel */
+        .customization-panel {
+            background-color: #e9e9e9;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #000;
+            border-radius: 5px;
+        }
+
+        /* Friends and Albums sections */
+        .friends-section, .album-section {
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .friends-section h3, .album-section h3 {
+            font-weight: bold;
+            color: #00008B;
+        }
+
+        /* Buttons */
+        button {
+            background-color: #00008B;
+            color: #fff;
+            border: 1px solid #000;
+            border-radius: 3px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-family: 'Courier Prime', monospace;
+        }
+        button:hover {
+            background-color: #0000CD;
+        }
+    </style>
+</head>
+<body>
+
+<div id="top-bar">
+    <div class="logo">Friendster</div>
+    <div class="search-bar">
+        <input type="text" placeholder="Search Web / Friendster">
+    </div>
+    <div class="top-links">
+        <a href="#">Settings</a> |
+        <a href="#">Help</a> |
+        <a href="{% url 'logout' %}">Log Out</a>
+    </div>
+</div>
+
+<div id="container">
+    <!-- Left Column -->
+    <div id="left-column">
+        <div class="profile-section">
+            <div class="profile-banner" id="profile-banner"></div>
+            <img src="{% static 'images/example.jpg' %}" alt="Profile Picture" id="profile-image">
+            <h2 id="profile-name">{{ first_name }}{% if not hide_last_name %} {{ last_name }}{% endif %}</h2>
+            <p id="profile-quote">"I find studying addictive. HAHA"</p>
+            <ul class="profile-details">
+                <li id="profile-details">Female, 18, Single</li>
+                <li id="member-since">Member Since: Aug 2004</li>
+            </ul>
+        </div>
+
+        <button onclick="toggleCustomizationPanel()">Customize Profile</button>
+
+        <!-- Customization Panel -->
+        <div class="customization-panel" id="customization-panel">
+            <h4>Customize Your Profile</h4>
+
+            <label for="profile-bg-color">Profile Background Color:</label>
+            <input type="color" id="profile-bg-color" value="#ffffff" onchange="changeProfileBackgroundColor(event)">
+            <br>
+
+            <label for="bg-color">Background Color:</label>
+            <input type="color" id="bg-color" value="#ffffff" onchange="changeBackgroundColor(event)">
+            <br>
+
+            <label for="font-style">Font Style:</label>
+            <select id="font-style" onchange="changeFontStyle(event)">
+                <option value="Arial">Arial</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Verdana">Verdana</option>
+            </select>
+            <br>
+
+            <label for="font-color">Name Font Color:</label>
+            <input type="color" id="font-color" value="#000000" onchange="changeFontColor(event)">
+            <br>
+
+            <label for="text-color">Text Color:</label>
+            <input type="color" id="text-color" value="#333333" onchange="changeTextColor(event)">
+            <br>
+
+            <label for="profile-pic">Upload Profile Picture:</label>
+            <input type="file" id="profile-pic" accept="image/*" onchange="updateProfilePicture(event)">
+            <br>
+
+            <button onclick="savePreferences()">Save Preferences</button>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div id="right-column">
+        <div class="friends-section">
+            <h3 id="friends-title">{{ first_name }}{% if not hide_last_name %} {{ last_name }}{% endif %}'s Friends</h3>
+            <div id="friends-list"></div>
+            <input type="text" id="friend-input" placeholder="Add a friend...">
+            <button onclick="addFriend()">Add Friend</button>
+        </div>
+
+        <div class="album-section">
+            <h3>yen ponio's Photo Gallery</h3>
+            <input type="text" id="album-name-input" placeholder="Custom Album Name...">
+            <button onclick="addAlbum()">Add Album</button>
+            <button onclick="deleteAlbum()">Delete Album</button>
+            <div id="albums-container"></div>
+
+            <!-- Example album entry for Go to Album -->
+            <div>
+                <h4>Album Name</h4>
+                <button onclick="window.location.href='{% url 'album' username=first_name %}'">Go to Album</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let friends = []; // Array to store friends
+let albums = {}; // Object to store albums
+
+// Load saved albums from localStorage
+window.onload = function() {
+    const savedAlbums = JSON.parse(localStorage.getItem('photoAlbums'));
+    if (savedAlbums) {
+        albums = savedAlbums; // Load saved albums
+        for (const albumName in albums) {
+            displayAlbum(albumName, albums[albumName]);
+        }
+    }
+
+    // Load saved preferences for customization
+    const preferences = JSON.parse(localStorage.getItem('profilePreferences')) || {};
+    if (preferences.backgroundColor) {
+        document.body.style.backgroundColor = preferences.backgroundColor; // Set background color
+        document.getElementById('bg-color').value = preferences.backgroundColor; // Update input
+    }
+    if (preferences.profileBgColor) {
+        document.querySelector('.profile-section').style.backgroundColor = preferences.profileBgColor; // Set profile background color
+        document.getElementById('profile-bg-color').value = preferences.profileBgColor; // Update input
+    }
+    if (preferences.fontStyle) {
+        document.body.style.fontFamily = preferences.fontStyle; // Set font style
+        document.getElementById('font-style').value = preferences.fontStyle; // Update input
+    }
+    if (preferences.fontColor) {
+        document.getElementById('profile-name').style.color = preferences.fontColor; // Set font color
+        document.getElementById('font-color').value = preferences.fontColor; // Update input
+    }
+    if (preferences.textColor) {
+        document.querySelectorAll('#profile-quote, #profile-details').forEach(element => {
+            element.style.color = preferences.textColor; // Set text color
+        });
+        document.getElementById('text-color').value = preferences.textColor; // Update input
+    }
+    if (preferences.profilePic) {
+        document.getElementById('profile-image').src = preferences.profilePic; // Set profile picture
+        document.getElementById('profile-pic').value = preferences.profilePic; // Update input
+    }
+};
+
+// Toggle Customization Panel
+function toggleCustomizationPanel() {
+    const panel = document.getElementById('customization-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none'; // Toggle visibility
+}
+
+// Add Album
+function addAlbum() {
+    const albumNameInput = document.getElementById('album-name-input');
+    const albumName = albumNameInput.value.trim(); // Get album name
+    if (albumName) {
+        albums[albumName] = []; // Create an empty array for the album
+        displayAlbum(albumName, []); // Display the new album
+        albumNameInput.value = ''; // Clear input
+        savePhotos(); // Save changes to localStorage
+    } else {
+        alert('Please enter a valid album name.'); // Alert if the name is empty
+    }
+}
+
+// Display Album
+function displayAlbum(albumName, photos) {
+    const albumContainer = document.createElement('div');
+    albumContainer.className = 'album';
+    albumContainer.id = albumName;
+
+    const goToAlbumButton = document.createElement('button');
+    goToAlbumButton.textContent = 'Go to Album';
+    goToAlbumButton.onclick = function() {
+        window.location.href = `album.html?album=${encodeURIComponent(albumName)}`; // Redirect to album page
+    };
+
+    albumContainer.innerHTML = `<h4>${albumName}</h4>`;
+    albumContainer.appendChild(goToAlbumButton); // Append the button to the album
+    document.querySelector('#albums-container').appendChild(albumContainer); // Append to the albums container
+}
+
+// Delete Album
+function deleteAlbum() {
+    const lastAlbumName = Object.keys(albums).pop(); // Get the last album name
+    if (lastAlbumName) {
+        delete albums[lastAlbumName]; // Delete the album
+        document.getElementById(lastAlbumName).remove(); // Remove from DOM
+        savePhotos(); // Save changes to localStorage
+        alert('Album deleted: ' + lastAlbumName); // Alert user
+    } else {
+        alert('No albums to delete.'); // Alert if no albums exist
+    }
+}
+
+// Add Friend Functionality
+function addFriend() {
+    const friendInput = document.getElementById('friend-input');
+    const friendName = friendInput.value.trim(); // Get friend name
+    if (friendName) {
+        friends.push(friendName); // Add friend to the array
+        friendInput.value = ''; // Clear input
+        displayFriends(); // Update the friends list display
+    } else {
+        alert('Please enter a friend name.'); // Alert if name is empty
+    }
+}
+
+function displayFriends() {
+    const friendsList = document.getElementById('friends-list');
+    friendsList.innerHTML = ''; // Clear existing list
+    friends.forEach(friend => {
+        const friendItem = document.createElement('div');
+        friendItem.textContent = friend; // Create a new div for each friend
+        friendsList.appendChild(friendItem); // Append to the list
+    });
+}
+
+// Profile Customization Functions
+function changeProfileBackgroundColor(event) {
+    const color = event.target.value; // Get selected color
+    document.querySelector('.profile-section').style.backgroundColor = color; // Change profile section background color
+}
+
+function changeBackgroundColor(event) {
+    const color = event.target.value; // Get selected color
+    document.body.style.backgroundColor = color; // Change body background color
+}
+
+function changeFontStyle(event) {
+    const fontStyle = event.target.value; // Get selected font style
+    document.body.style.fontFamily = fontStyle; // Change font style for body
+}
+
+function changeFontColor(event) {
+    const color = event.target.value; // Get selected color
+    document.getElementById('profile-name').style.color = color; // Change name font color
+}
+
+function changeTextColor(event) {
+    const color = event.target.value; // Get selected color
+    document.querySelectorAll('#profile-quote, #profile-details').forEach(element => {
+        element.style.color = color; // Change text color
+    });
+}
+
+function updateProfilePicture(event) {
+    const file = event.target.files[0]; // Get selected file
+    const reader = new FileReader(); // Create FileReader to read the file
+    reader.onload = function(e) {
+        document.getElementById('profile-image').src = e.target.result; // Set profile image src
+    };
+    reader.readAsDataURL(file); // Read the file as a data URL
+}
+
+// Save Preferences Functionality
+function savePreferences() {
+    const preferences = {
+        profileBgColor: document.querySelector('.profile-section').style.backgroundColor,
+        backgroundColor: document.body.style.backgroundColor,
+        fontStyle: document.body.style.fontFamily,
+        fontColor: document.getElementById('profile-name').style.color,
+        textColor: document.querySelector('#profile-quote').style.color,
+        profilePic: document.getElementById('profile-image').src
+    };
+    localStorage.setItem('profilePreferences', JSON.stringify(preferences)); // Save preferences to localStorage
+    alert('Preferences saved!'); // Alert user
+}
+</script>
+
+</body>
+</html>
